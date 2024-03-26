@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.0.0/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.0.0/ol.css">
+    <meta charset="UTF-8">
+    <title>Mapa con OpenLayers</title>
+    <style>
+        #map {
+            height: 900px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    var map = new ol.Map({
+        target: 'map',
+        layers: [
+            new ol.layer.Tile({
+                source: new ol.source.OSM()
+            })
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([-70.657, 18.7357]), // Centrado en la República Dominicana
+            zoom: 8 // Zoom inicial
+        })
+    });
+
+    var indexedDb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var request = indexedDb.open("FormularioDB", 1);
+
+    request.onupgradeneeded = function (event) {
+        var db = event.target.result;
+        var objectStore = db.createObjectStore("formularios", {keyPath: "id", autoIncrement: true});
+
+        // Define un índice para latitud y longitud
+        objectStore.createIndex("latitud", "latitud", {unique: false});
+        objectStore.createIndex("longitud", "longitud", {unique: false});
+    }
+
+    // Función para añadir un pin al mapa con la ubicación del formulario
+    function addPin(latitude, longitude) {
+        var pin = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.fromLonLat([longitude, latitude]))
+        });
+
+        var pinStyle = new ol.style.Style({
+            image: new ol.style.Icon({
+                anchor: [0.5, 1],
+                src: 'https://openlayers.org/en/latest/examples/data/icon.png'
+            })
+        });
+
+        pin.setStyle(pinStyle);
+
+        var pinLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [pin]
+            })
+        });
+
+        map.addLayer(pinLayer);
+    }
+
+    // Escuchar cambios en la base de datos y añadir un pin cuando se registre un nuevo formulario
+    request.onsuccess = function (event) {
+        var db = event.target.result;
+        db.transaction("formularios").objectStore("formularios").getAll().onsuccess = function (event) {
+            var formularios = event.target.result;
+            formularios.forEach(function (formulario) {
+                addPin(formulario.latitud, formulario.longitud);
+            });
+        };
+    };
+</script>
+</body>
+</html>
