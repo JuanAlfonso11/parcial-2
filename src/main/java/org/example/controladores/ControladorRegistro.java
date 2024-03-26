@@ -4,7 +4,7 @@ import io.javalin.Javalin;
 import org.example.clase.Criptografia;
 import org.example.clase.encuesta;
 import org.example.clase.usuario;
-import org.example.servicios.ServicioRegistro;
+//import org.example.servicios.ServicioRegistro;
 import org.example.servicios.ServiciosEncuesta;
 import org.example.util.BaseControler;
 
