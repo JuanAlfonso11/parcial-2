@@ -110,7 +110,7 @@
         <label for="nivel_escolar">Nivel Escolar:</label>
         <select id="nivel_escolar" name="nivel_escolar" required>
             <option value="">Selecciona un nivel escolar</option>
-            <option value="Básico">Básico</option>
+            <option value="Básico">Basico</option>
             <option value="Medio">Medio</option>
             <option value="Grado Universitario">Grado Universitario</option>
             <option value="Postgrado">Postgrado</option>
@@ -156,7 +156,8 @@
         document.getElementById('latitud').value = lat;
         document.getElementById('longitud').value = lon;
     }
-
+</script>
+<script>
     var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 
     function agregarFormulario() {
@@ -212,8 +213,15 @@
             console.error("Error opening database", event.target.errorCode);
         };
     }
+</script>
+<script>
+    function verificarConexion(records){
+        if(!webSocket|| webSocket.readyState==3){
+            sincronizarDatos(records);
+        }
+    }
     function sincronizarDatos(records){
-        //var socket = new WebSocket("ws://localhost:7000/encuesta")
+        // webSocket = new WebSocket("ws://localhost:7000/encuesta")
         webSocket = new WebSocket("wss//"+location.hostname+":"+location.port+"/encuesta");
         webSocket.onopen= function() {
             webSocket.send(JSON.stringify(records));
@@ -231,11 +239,7 @@
                 console.error("Error al eliminar los registros");
             };
         }
-        function verificarConexion(records){
-            if(!webSocket|| webSocket.readyState==3){
-                sincronizarDatos(records);
-            }
-        }
+
     }
 
 </script>
